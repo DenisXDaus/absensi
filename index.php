@@ -1,0 +1,63 @@
+<?php
+// Mulai session untuk menyimpan data
+session_start();
+
+// Inisialisasi data jika belum ada
+if (!isset($_SESSION['absensi'])) {
+    $_SESSION['absensi'] = [];
+}
+
+// Proses tambah data
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nama'])) {
+    $nama = htmlspecialchars($_POST['nama']);
+    $_SESSION['absensi'][] = ['nama' => $nama, 'waktu' => date('Y-m-d H:i:s')];
+}
+
+// Proses hapus data
+if (isset($_GET['hapus'])) {
+    $index = $_GET['hapus'];
+    if (isset($_SESSION['absensi'][$index])) {
+        unset($_SESSION['absensi'][$index]);
+        $_SESSION['absensi'] = array_values($_SESSION['absensi']); // Reset index array
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Absensi Sederhana</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h2>Form Absensi</h2>
+    <hr>
+    <form method="POST">
+        <input type="text" name="nama" placeholder="Masukkan Nama" required>
+        <button type="submit">Absen</button>
+    </form>
+
+    <h2>Daftar Hadir</h2>
+    <hr>
+    <table>
+        <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Waktu</th>
+            <th>Delete</th>
+        </tr>
+        <?php if (!empty($_SESSION['absensi'])): ?>
+            <?php foreach ($_SESSION['absensi'] as $i => $data): ?>
+                <tr>
+                    <td><?= $i + 1 ?></td>
+                    <td><?= $data['nama'] ?></td>
+                    <td><?= $data['waktu'] ?></td>
+                    <td><a href="?hapus=<?= $i ?>" onclick="return confirm('Yakin ingin menghapus?')">Hapus</a></td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr><td colspan="4">Belum ada yang absen.</td></tr>
+        <?php endif; ?>
+    </table>
+</body>
+</html>
